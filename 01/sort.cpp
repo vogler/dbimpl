@@ -43,17 +43,11 @@ int main(int argc, char* argv[]) {
 	for(int run=0; run<runs; run++){
 		char filename[strlen(argv[2])+1+(int)ceil(log10(runs+1))];
 		sprintf(filename, "%s_%d", argv[2], run);
-		std::cout << "run " << run << ". Filename is " << filename << std::endl;
 		unsigned n = bufferSize/sizeof(uint64_t);
-		long buffer[n];
-		int count;
-		unsigned runSize = 0;
-		std::cout << "starting to read " << n << " elements. Buffersize is " << bufferSize << std::endl;
-		while(count = read(fi, &buffer, bufferSize)){
-			std::cout << "run " << run << ": read " << count << " Byte" << std::endl;
-			runSize += count;
-			if(count < 0) break;
-		}
+		uint64_t buffer[n];
+		std::cout << "run " << run << ": starting to read " << n << " elements..." << std::endl;
+		unsigned runSize = read(fi, &buffer, bufferSize);
+		std::cout << "run " << run << ": read " << runSize << " Byte" << std::endl;
 		//for (int i = 0; i < n; ++i) 
 		//	std::cout << buffer[i] << ' ';
 		//std::cout << "sorting..." << std::endl;
@@ -72,7 +66,7 @@ int main(int argc, char* argv[]) {
 			std::cout << "error writing to " << filename << ": " << strerror(errno) << std::endl;
 			return -1;
 		}
-		std::cout << "wrote " << runSize << " Byte to " << filename << std::endl;
+		std::cout << "run " << run << ": wrote " << runSize << " Byte to " << filename << std::endl;
 		close(fo);
 	}
 	close(fi);
