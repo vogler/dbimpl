@@ -10,3 +10,7 @@
 *.lai
 *.la
 *.a
+
+*.tar.gz
+*.pdf
+*.swp
