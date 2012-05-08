@@ -61,10 +61,12 @@ void externalSort(int fdInput, unsigned long size, int fdOutput, unsigned long m
 		}
 	}
 		
-	// read memSize/(runs+1) elements from each run at once, push it into a queue and write it to fdOutput
+	// read memSize/(runs+1) elements from each run at once, push the first element of each run into the queue
+	// loop: write the q.top() to output and load the next element from the run it was from
 	unsigned long readElements = 0;
 	while(readElements < size){
 		std::priority_queue<uint32_t> q;
+		// fill buffers -> TODO getNext()
 		for(unsigned run=0; run<runs; run++){
 			// read into buffer
 			unsigned m = n/(runs+1);
@@ -72,16 +74,20 @@ void externalSort(int fdInput, unsigned long size, int fdOutput, unsigned long m
 			unsigned readSize = read(fdRuns[run], &buffer, sizeof(buffer));
 			if(readSize < 0) continue;
 			readElements += readSize/sizeof(uint64_t);
-			// write to queue
-			for(int i=0; i<m; i++) q.push(buffer[i]);
+			// write first element to queue
+			q.push(buffer[0]);
 		}
-		// write to fdOutput
+		// get min of all runs and save it in output buffer
+
+		// load next element of run it was from
+
+		// write buffer to fdOutput
 		if (write(fdOutput, &q, sizeof(q)) < 0) {
 			std::cout << "error writing to output file" << strerror(errno) << std::endl;
 			return;
 		}
-		// clear queue
-
+		// done if queue is empty
+		if(q.empty()) break;
 	}
 
 	// close files of runs

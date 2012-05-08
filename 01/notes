@@ -1,0 +1,3 @@
+g++ -march=native -mtune=core2
+valgrind ./1
+valgrind --tool=helgrind ./1

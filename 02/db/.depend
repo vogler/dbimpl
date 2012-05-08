@@ -1,0 +1,3 @@
+BufferFrame.o: buffer/BufferFrame.cpp buffer/BufferFrame.hpp
+BufferManager.o: buffer/BufferManager.cpp buffer/BufferManager.hpp \
+ buffer/BufferFrame.hpp
