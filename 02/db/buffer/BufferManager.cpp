@@ -63,7 +63,7 @@ void BufferManager::unfixPage(BufferFrame& frame, bool isDirty){
     frame.isDirty = false;
   }
   frame.fixed = false;
-  this->lru.erase(frame);
+  this->lru.erase(*frame);
   this->lru.push_back(frame);
 }
 
