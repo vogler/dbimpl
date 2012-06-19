@@ -28,7 +28,8 @@ public:
 	enum SegmentType {
 		SI,
 		SP,
-		BTree
+		BTree,
+		Schema
 	};
 
 

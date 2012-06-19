@@ -5,15 +5,14 @@
 #include <cassert>
 #include <string.h>
 
-#include "BufferManager.hpp"
-#include "SegmentManager.hpp"
+#include "DBMS.hpp" // include your stuff here
 #include "Record.hpp"
 
 using namespace std;
 
 // todo: adapt to your implementation
 uint64_t extractPage(TID tid) {
-   return tid>>32;
+   return tid >> 16;
 }
 
 const unsigned initialSize = 100; // in (slotted) pages
@@ -45,22 +44,21 @@ class Random64 {
  */
 int main(int argc, char** argv) {
    // Check arguments
-//   if (argc != 2) {
-//      cerr << "usage: " << argv[0] << " <pageSize>" << endl;
-//      return -1;
-//   }
-   const unsigned pageSize = BufferManager::PAGE_SIZE;//atoi(argv[1]);
+   if (argc != 2) {
+      cerr << "usage: " << argv[0] << " <pageSize>" << endl;
+      return -1;
+   }
+   const unsigned pageSize = atoi(argv[1]);
 
    // Bookkeeping
-   map<TID, unsigned> values; // TID -> testData entry
-   map<unsigned, unsigned> usage; // pageID -> bytes used within this page
+   unordered_map<TID, unsigned> values; // TID -> testData entry
+   unordered_map<unsigned, unsigned> usage; // pageID -> bytes used within this page
 
    // Setting everything up
-   BufferManager bm("db", 10ul*1024ul*1024ul); // bogus arguments
+   BufferManager bm("/tmp/db", 10ul*1024ul*1024ul); // bogus arguments
    SegmentManager sm(bm);
-
    SegmentID spId = sm.createSegment(Segment::SegmentType::SP, totalSize);
-   SPSegment sp = static_cast<SPSegment&>(sm.getSegment(spId));
+   SPSegment& sp = static_cast<SPSegment&>(sm.getSegment(spId));
    Random64 rnd;
 
    // Insert some records
@@ -72,7 +70,6 @@ int main(int argc, char** argv) {
       // Check that there is space available for 's'
       bool full = true;
       for (unsigned p=0; p<initialSize; ++p) {
-    	  cout<<usage[p]<<" < "<<loadFactor*pageSize<<endl;
          if (usage[p] < loadFactor*pageSize) {
             full = false;
             break;
@@ -82,19 +79,11 @@ int main(int argc, char** argv) {
          break;
 
       // Insert record
-	  TID tid;
-	  try {
-		 tid = sp.insert(Record(s.size(), s.c_str()));
-	  } catch(exception& e) {
-		  cout<<"full: "<<i<<endl;
-		 break;
-	  }
-
+      TID tid = sp.insert(Record(s.size(), s.c_str()));
       assert(values.find(tid)==values.end()); // TIDs should not be overwritten
       values[tid]=r;
       unsigned pageId = extractPage(tid); // extract the pageId from the TID
       assert(pageId < initialSize); // pageId should be within [0, initialSize)
-
       usage[pageId]+=s.size();
    }
 
@@ -110,7 +99,7 @@ int main(int argc, char** argv) {
       unsigned len = value.size();
 
       // Lookup
-      const Record& rec = *sp.lookup(tid);
+      const Record& rec = sp.lookup(tid);
       assert(rec.getLen() == len);
       assert(memcmp(rec.getData(), value.c_str(), len)==0);
 
@@ -140,12 +129,10 @@ int main(int argc, char** argv) {
       TID tid = p.first;
       const std::string& value = testData[p.second];
       unsigned len = value.size();
-      const Record& rec = *sp.lookup(tid);
+      const Record& rec = sp.lookup(tid);
       assert(rec.getLen() == len);
       assert(memcmp(rec.getData(), value.c_str(), len)==0);
    }
 
-//   delete sp;
-   cout<<"finish"<<endl;
    return 0;
 }

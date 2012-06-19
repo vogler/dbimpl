@@ -4,10 +4,11 @@
 #include <pthread.h>
 #include <iostream>
 #include <map>
+#include "../buffer/SlottedPage.hpp"
 using namespace std;
 
 
-typedef uint64_t TID;
+//typedef uint64_t TID;
 
 template <class T, class CMP>
 class BTree{
@@ -58,7 +59,7 @@ private:
               n1.children[it->first] = it->second;
             }else if(i==middle){
               n1.children[it->first] = it->second;
-              n.upper->children[it->first] = n1;
+              n.upper->children[it->first] = n1; // TODO: other children of parent?
             }else{
               n2.children[it->first] = it->second;
             }
@@ -78,12 +79,13 @@ private:
         }
       }
       if(!found){
-        if(n.upper == NULL){
+        if(n.upper == NULL){ // when does this happen?
           return n; // TODO: maybe not a leaf
         }
         n = *n.upper;
       }
     }
+    return n; // to avoid eclipse warning about no return
   }
 };
 #endif /* BTREE_HPP_ */

@@ -3,3 +3,5 @@ test: testing/BufferManagerTest.cpp Makefile
 
 clean:
 	rm -rf test
+
+all:	test
