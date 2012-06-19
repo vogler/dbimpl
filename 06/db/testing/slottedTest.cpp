@@ -4,9 +4,16 @@
 #include <cstdint>
 #include <cassert>
 #include <string.h>
+#include <unordered_map>
 
-#include "DBMS.hpp" // include your stuff here
-#include "Record.hpp"
+
+//#include "DBMS.hpp" // include your stuff here
+#include "../buffer/BufferManager.hpp"
+#include "../buffer/SlottedPage.hpp"
+#include "../buffer/Segment.hpp"
+#include "../buffer/SPSegment.hpp"
+#include "../buffer/SISegment.hpp"
+#include "../buffer/Record.hpp"
 
 using namespace std;
 
@@ -99,7 +106,7 @@ int main(int argc, char** argv) {
       unsigned len = value.size();
 
       // Lookup
-      const Record& rec = sp.lookup(tid);
+      const Record& rec = *(sp.lookup(tid));
       assert(rec.getLen() == len);
       assert(memcmp(rec.getData(), value.c_str(), len)==0);
 
@@ -129,7 +136,7 @@ int main(int argc, char** argv) {
       TID tid = p.first;
       const std::string& value = testData[p.second];
       unsigned len = value.size();
-      const Record& rec = sp.lookup(tid);
+      const Record& rec = *(sp.lookup(tid));
       assert(rec.getLen() == len);
       assert(memcmp(rec.getData(), value.c_str(), len)==0);
    }

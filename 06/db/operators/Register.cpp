@@ -51,7 +51,6 @@ std::string Register::toString() {
 	std::map<unsigned int, DataType>::iterator iter;
 	std::string strToReturn = "";
 
-	// TODO: this loop isnt necessary more as we should store only one value in the register
 	for (iter = offsetInReg.begin(); iter != offsetInReg.end(); ++iter) {
 		if (iter->second == Integer) {
 			std::stringstream ss;

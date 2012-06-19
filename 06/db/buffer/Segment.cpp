@@ -5,7 +5,7 @@
  *      Author: user
  */
 
-#include <Segment.hpp>
+#include "Segment.hpp"
 
 Segment::Segment(BufferManager& bm, vector<BufferFrame*> pages): bm(bm), pages(pages) {
 }

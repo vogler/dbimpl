@@ -6,7 +6,6 @@
 #include "BufferFrame.hpp"
 #include "SISegment.hpp"
 #include "SPSegment.hpp"
-#include "BTreeSegment.hpp"
 #include <vector>
 
 using namespace std;

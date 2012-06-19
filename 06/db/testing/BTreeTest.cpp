@@ -5,8 +5,10 @@
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 //#include "MyDatabaseIncludes.hpp"
+#include "../btree/BTree.hpp"
 
 /* Comparator functor for uint64_t*/
 struct MyCustomUInt64Cmp {
@@ -67,10 +69,11 @@ const IntPair& getKey(const uint64_t& i) {
 template <class T, class CMP>
 void test(uint64_t n) {
    // Set up stuff, you probably have to change something here to match to your interfaces
-   BufferManager bm("/tmp/db", 10ul*1024ul*1024ul); // bogus arguments
-   SegmentManager sm(bm);
-   SegmentID spId = sm.createSegment(Segment::SegmentType::BTree);
-   BTreeSegment& seg = static_cast<BTreeSegment&>(sm.getSegment(spId));
+//   BufferManager bm("/tmp/db", 10ul*1024ul*1024ul); // bogus arguments
+//   SegmentManager sm(bm);
+//   SegmentID spId = sm.createSegment(Segment::SegmentType::BTree);
+//   BTreeSegment& seg = static_cast<BTreeSegment&>(sm.getSegment(spId));
+   int seg = 0;
    BTree<T, CMP> bTree(seg);
 
    // Insert values
