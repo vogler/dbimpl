@@ -1,10 +1,3 @@
-/*
- * Segment.cpp
- *
- *  Created on: May 29, 2012
- *      Author: user
- */
-
 #include "Segment.hpp"
 
 Segment::Segment(BufferManager& bm, vector<BufferFrame*> pages): bm(bm), pages(pages) {

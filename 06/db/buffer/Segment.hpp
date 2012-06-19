@@ -1,10 +1,3 @@
-/*
- * Segment.hpp
- *
- *  Created on: May 29, 2012
- *      Author: user
- */
-
 #ifndef SEGMENT_HPP_
 #define SEGMENT_HPP_
 

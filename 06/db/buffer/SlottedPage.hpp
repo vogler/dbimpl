@@ -1,10 +1,3 @@
-/*
- * SlottedPage.hpp
- *
- *  Created on: May 29, 2012
- *      Author: user
- */
-
 #ifndef SLOTTEDPAGE_HPP_
 #define SLOTTEDPAGE_HPP_
 

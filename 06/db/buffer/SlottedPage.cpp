@@ -1,10 +1,3 @@
-/*
- * SlottedPage.cpp
- *
- *  Created on: May 29, 2012
- *      Author: user
- */
-
 #include "SlottedPage.hpp"
 
 SlottedPage::SlottedPage(BufferFrame& frame): _frame(frame) {

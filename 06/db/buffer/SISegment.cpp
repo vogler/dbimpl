@@ -1,10 +1,3 @@
-/*
- * SISegment.cpp
- *
- *  Created on: May 29, 2012
- *      Author: user
- */
-
 #include "SISegment.hpp"
 #include <stdio.h>
 #include <iostream>

@@ -7,33 +7,30 @@ using namespace std;
 
 #define LENGTH 100
 
-struct SchemaInformation {
-	TID firstRelationInformation;
-	TID lastRelationInformation;
+struct SSchema {
+	TID firstRelation;
+	TID lastRelation;
 };
 
-struct RelationInformation {
-	char		name[LENGTH];
-	SegmentID	segment;
-	TID			firstAttributeInformation;
-	TID			lastAttributeInformation;
-	TID			firstIndexInformation;
-	TID			nextRelationInformation;
+struct SRelation {
+	char name[LENGTH];
+	SegmentID segment;
+	TID firstAttribute;
+	TID lastAttribute;
+	TID nextRelation;
 };
 
-struct AttributeInformation {
-	char			name[LENGTH];
-	unsigned int	tupleOffset;
-    Types::Tag 		type;
-    unsigned int	len;
-    bool 			notNull;
-    TID				nextAttributeInformation;
+struct SAttribute {
+	char name[LENGTH];
+	unsigned int offset;
+	Types::Tag type;
+	unsigned int lenth;
+	bool notNull;
+	TID nextAttribute;
 };
 
-
-class SchemaSegment : public SPSegment {
+class SchemaSegment: public SPSegment {
 private:
-	TID schema();
 	TID getRelation(string name);
 	TID firstRelation();
 	TID lastRelation();
@@ -48,9 +45,10 @@ public:
 	TID addRelation(string name, SegmentID segment);
 
 	TID addAttribute(string relationName, string attributeName,
-			unsigned int tupleOffset, Types::Tag type, unsigned int length, bool notNull);
-    Types::Tag getAttributeType(string relationName, string attributeName);
-    unsigned int getAttributeOffset(string relationName, string attributeName);
+			unsigned int tupleOffset, Types::Tag type, unsigned int length,
+			bool notNull);
+	Types::Tag getAttributeType(string relationName, string attributeName);
+	unsigned int getAttributeOffset(string relationName, string attributeName);
 
 	void readSchemaFromFile(string filename, SegmentManager* sm);
 

@@ -60,13 +60,13 @@ public:
 	bool operator==(Register* other);
 	int getHash();
 
-	template <class T>
-	void setStructure(T value){
+	template<class T>
+	void setStructure(T value) {
 		offsetInReg[0] = Struct;
 		reinterpret_cast<T*>(this->data)[0] = value;
 	}
-	template <class T>
-	T getStructure(){
+	template<class T>
+	T getStructure() {
 		return *reinterpret_cast<T*>(this->data);
 	}
 

@@ -19,139 +19,115 @@ SchemaSegment::~SchemaSegment() {
 TID SchemaSegment::addRelation(string name, SegmentID segment){
 	assert(name.size() <= LENGTH);
 
-	// create and insert relation information
-	RelationInformation newRelRec = { "", segment, 0, 0, 0 };
-	name.copy(newRelRec.name, name.size(), 0);
-	TID newRel = this->insert<RelationInformation>( newRelRec );
+	SRelation rel = { "", segment, 0, 0, 0 };
+	name.copy(rel.name, name.size(), 0);
+	TID newRel = this->insert<SRelation>(rel);
 
-	unique_ptr<SchemaInformation> info = this->lookup<SchemaInformation>(schema());
-	if(this->isEmpty()){
-		// also update first relation information
-		info->firstRelationInformation = newRel;
-	} else {
-		// udpate link of last relation information to point to new one
-		unique_ptr<RelationInformation> currentLast = this->lookup<RelationInformation>(info->lastRelationInformation);
-		currentLast->nextRelationInformation = newRel;
-		this->update<RelationInformation>(info->lastRelationInformation, move(currentLast));
+	unique_ptr<SSchema> info = this->lookup<SSchema>(0);
+	if(this->isEmpty()){ // first
+		info->firstRelation = newRel;
+	} else { // next & last
+		unique_ptr<SRelation> currentLast = this->lookup<SRelation>(info->lastRelation);
+		currentLast->nextRelation = newRel;
+		this->update<SRelation>(info->lastRelation, move(currentLast));
 	}
-	// udpate schema informations link to last information
-	info->lastRelationInformation = newRel;
-	this->update<SchemaInformation>(schema(), move(info));
+	info->lastRelation = newRel;
+	this->update<SSchema>(0, move(info));
 	return newRel;
 }
 
 SegmentID SchemaSegment::getRelationSegmentID(string relationName){
 	TID relationInfoTID = this->getRelation(relationName);
-	unique_ptr<RelationInformation> relationInfo = this->lookup<RelationInformation>(relationInfoTID);
+	unique_ptr<SRelation> relationInfo = this->lookup<SRelation>(relationInfoTID);
 	return relationInfo->segment;
 }
-
-
-
 
 TID SchemaSegment::addAttribute(string relationName, string attributeName,
 		unsigned int tupleOffset, Types::Tag type, unsigned int length, bool notNull){
 	assert(relationName.size() <= LENGTH && attributeName.size() <= LENGTH);
 
-	// get relation
 	TID relationInfoTID = this->getRelation(relationName);
-	unique_ptr<RelationInformation> relationInfo = this->lookup<RelationInformation>(relationInfoTID);
+	unique_ptr<SRelation> relationInfo = this->lookup<SRelation>(relationInfoTID);
 
-	// create and insert attribute information
-	AttributeInformation newAttrRec = { "", tupleOffset, type, length, notNull, 0, false, 0 };
+	SAttribute newAttrRec = { "", tupleOffset, type, length, notNull, 0, false, 0 };
 	attributeName.copy(newAttrRec.name, attributeName.size(), 0);
-	TID newAttr = this->insert<AttributeInformation>( newAttrRec );
+	TID newAttr = this->insert<SAttribute>( newAttrRec );
 
-	if(SlottedPage::getPageID(relationInfo->firstAttributeInformation) == 0 && SlottedPage::getSlotID(relationInfo->firstAttributeInformation) == 0){
-		// also update first relation information if there is none yet
-		relationInfo->firstAttributeInformation = newAttr;
+	if(SlottedPage::getPageID(relationInfo->firstAttribute) == 0 && SlottedPage::getSlotID(relationInfo->firstAttribute) == 0){
+		relationInfo->firstAttribute = newAttr;
 	} else {
-		// udpate link of last attribute information to point to new one
-		unique_ptr<AttributeInformation> currentLast = this->lookup<AttributeInformation>(relationInfo->lastAttributeInformation);
-		currentLast->nextAttributeInformation = newAttr;
-		this->update<AttributeInformation>(relationInfo->lastAttributeInformation, move(currentLast));
+		unique_ptr<SAttribute> currentLast = this->lookup<SAttribute>(relationInfo->lastAttribute);
+		currentLast->nextAttribute = newAttr;
+		this->update<SAttribute>(relationInfo->lastAttribute, move(currentLast));
 	}
-	// udpate relation information's link to last attribute information
-	relationInfo->lastAttributeInformation = newAttr;
-	this->update<RelationInformation>(relationInfoTID, move(relationInfo));
+	relationInfo->lastAttribute = newAttr;
+	this->update<SRelation>(relationInfoTID, move(relationInfo));
 	return newAttr;
 }
 
 Types::Tag SchemaSegment::getAttributeType(string relationName, string attributeName){
 	TID attrTID = this->getAttribute(relationName, attributeName);
-	unique_ptr<AttributeInformation> attr = this->lookup<AttributeInformation>(attrTID);
+	unique_ptr<SAttribute> attr = this->lookup<SAttribute>(attrTID);
 	return attr->type;
 }
 
 unsigned int SchemaSegment::getAttributeOffset(string relationName, string attributeName){
 	TID attrTID = this->getAttribute(relationName, attributeName);
-	unique_ptr<AttributeInformation> attr = this->lookup<AttributeInformation>(attrTID);
-	return attr->tupleOffset;
+	unique_ptr<SAttribute> attr = this->lookup<SAttribute>(attrTID);
+	return attr->offset;
 }
 
-
 void SchemaSegment::readSchemaFromFile(string filename, SegmentManager* sm){
-	// metadata/schema segment
 	Parser p(filename);
 	try {
 		std::unique_ptr<Schema> schema = p.parse();
-		//std::cout << schema->toString() << std::endl;
 
 		for(const Schema::Relation& rel : schema->relations){
-			// create segment and save relation information in schema segment
 			SegmentID sid = sm->createSegment<SPSegment>(20);
 			this->addRelation(rel.name, sid);
 
-			// save attribute information
-			unsigned int currentTupleOffset = 0;
+			unsigned int tupleOffset = 0;
 			for (const auto& attr : rel.attributes) {
-				this->addAttribute(rel.name, attr.name, currentTupleOffset, attr.type, attr.len, attr.notNull);
+				this->addAttribute(rel.name, attr.name, tupleOffset, attr.type, attr.len, attr.notNull);
 				if(attr.len != (unsigned int)-1)
-					currentTupleOffset += attr.len;
+					tupleOffset += attr.len;
 				else
-					currentTupleOffset += 4;
+					tupleOffset += 4;
 			}
-
-			// TODO: index
 		}
 	} catch (ParserError& e) {
 		std::cerr << e.what() << std::endl;
 	}
 }
 
-
-TID SchemaSegment::schema(){
-	return 0;
-}
-
 TID SchemaSegment::getRelation(string name){
 	assert(name.size() <= LENGTH);
 	TID relationTID = this->firstRelation();
 	while( ! (SlottedPage::getPageID(relationTID) == 0 && SlottedPage::getSlotID(relationTID) == 0) ){
-		unique_ptr<RelationInformation> info = this->lookup<RelationInformation>(relationTID);
+		unique_ptr<SRelation> info = this->lookup<SRelation>(relationTID);
 		if(strcmp(info->name, name.c_str()) == 0){
 			return relationTID;
 		}
-		relationTID = info->nextRelationInformation;
+		relationTID = info->nextRelation;
 	}
 	return relationTID;
 }
 
 TID SchemaSegment::firstRelation(){
-	unique_ptr<SchemaInformation> info = this->lookup<SchemaInformation>(schema());
-	TID result = info->firstRelationInformation;
+	unique_ptr<SSchema> info = this->lookup<SSchema>(0);
+	TID result = info->firstRelation;
 	return result;
 }
 
 TID SchemaSegment::lastRelation(){
-	unique_ptr<SchemaInformation> info = this->lookup<SchemaInformation>(schema());
-	TID result = info->lastRelationInformation;
+	unique_ptr<SSchema> info = this->lookup<SSchema>(0);
+	TID result = info->lastRelation;
 	return result;
 }
 
 bool SchemaSegment::isEmpty(){
-	unique_ptr<SchemaInformation> info = this->lookup<SchemaInformation>(schema());
-	TID last = info->lastRelationInformation;
+	unique_ptr<SSchema> info = this->lookup<SSchema>(0);
+	TID last = info->lastRelation;
 	if(SlottedPage::getPageID(last) == 0 && SlottedPage::getSlotID(last) == 0){
 		return true;
 	} else {
@@ -163,16 +139,15 @@ TID SchemaSegment::getAttribute(string relationName, string attributeName){
 	assert(attributeName.size() <= LENGTH);
 
 	TID relationTID = this->getRelation(relationName);
-	unique_ptr<RelationInformation> relation = this->lookup<RelationInformation>(relationTID);
+	unique_ptr<SRelation> relation = this->lookup<SRelation>(relationTID);
 
-	TID attributeTID = relation->firstAttributeInformation;
+	TID attributeTID = relation->firstAttribute;
 	while( ! (SlottedPage::getPageID(attributeTID) == 0 && SlottedPage::getSlotID(attributeTID) == 0) ){
-		unique_ptr<AttributeInformation> info = this->lookup<AttributeInformation>(attributeTID);
+		unique_ptr<SAttribute> info = this->lookup<SAttribute>(attributeTID);
 		if(strcmp(info->name, attributeName.c_str()) == 0){
-			// we found an attribute with the given name
 			return attributeTID;
 		}
-		attributeTID = info->nextAttributeInformation;
+		attributeTID = info->nextAttribute;
 	}
 	return attributeTID;
 }
