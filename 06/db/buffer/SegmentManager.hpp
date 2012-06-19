@@ -4,14 +4,28 @@
 #include <iostream>
 #include "BufferManager.hpp"
 #include "BufferFrame.hpp"
+#include "SISegment.hpp"
 #include "SPSegment.hpp"
+#include "BTreeSegment.hpp"
 #include <vector>
 
 using namespace std;
 
+class SISegment;
+
+
+/**
+ * Segment Manager
+ */
 class SegmentManager
 {
+
+
 public:
+	static class IllegalSegmentException: public exception
+	{
+	} IllegalSegmentException;
+
 	/** public member **/
 
 
@@ -19,14 +33,22 @@ public:
 	SegmentManager(BufferManager& bm);
 	~SegmentManager();
 	
-	unsigned addSegment();
-	SPSegment& getSegment(unsigned id);
+	/**
+	 * create new segment
+	 */
+	SegmentID createSegment(Segment::SegmentType type, unsigned size);
+	/**
+	 * get segment from id
+	 */
+	Segment& getSegment(SegmentID id);
+	/**
+	 * get size in pages
+	 */
 	unsigned size();
 
 protected:
 	BufferManager& bm;
-	BufferFrame& si;
-	vector<SPSegment*> segments;
+	SISegment* si;
 };
 
 

@@ -6,11 +6,19 @@
  */
 
 #include "BufferManager.hpp"
+#include  <cstring>
 
 
 BufferManager::BufferManager(const string& filename, unsigned size):
-_fstream(filename.c_str(), fstream::in | fstream::out), _filename(filename), _size(size)
+_filename(filename), _size(size)
 {
+	fstream(filename.c_str(), fstream::out).close();
+	_fstream = new fstream(filename.c_str(), fstream::in | fstream::out);
+	if (_fstream->fail()) {
+		cout<<strerror( errno );
+		throw 1;
+	}
+
 	pthread_mutexattr_t a;
 	pthread_mutexattr_init(&a);
 	pthread_mutexattr_settype(&a,PTHREAD_MUTEX_RECURSIVE);
@@ -28,6 +36,8 @@ BufferManager::~BufferManager()
 		this->_deleteFrame(this->_buffer.begin()->second.second);
 	}
 
+	_fstream->close();
+
 	pthread_mutex_unlock(&this->_bufferMutex);
 }
 
@@ -36,8 +46,8 @@ BufferFrame& BufferManager::fixPage(unsigned pageId, bool exclusive)
 	pthread_mutex_lock(&this->_bufferMutex); // lock buffer so no other thread can interfere while we get/add a frame
 	pthread_mutex_lock(&this->_lifoMutex);
 
-	cout<<"fixpage"<<pageId<< " "<< (exclusive?"exclusive":"NON-exclusive")<<" (buffer="<<this->_buffer.size()<<")"<<endl;
-	BufferFrame* frame;
+	//cout<<"fixpage"<<pageId<< " "<< (exclusive?"exclusive":"NON-exclusive")<<" (buffer="<<this->_buffer.size()<<")"<<endl;
+BufferFrame* frame;
 	if (this->_buffer.find(pageId) != this->_buffer.end()) {//cout<<1<<endl;
 		frame = this->_buffer.find(pageId)->second.second;
 		pthread_mutex_lock(&frame->mutex);
@@ -85,7 +95,7 @@ BufferFrame& BufferManager::fixPage(unsigned pageId, bool exclusive)
 		 * create empty frame object, lock it, push it to the buffer and immediately release the buffer
 		 * => only access to the frame is blocked and other operations on the buffer can still be done
 		 */
-		frame = new BufferFrame(pageId, NULL);
+		frame = new BufferFrame(pageId, PAGE_SIZE, NULL);
 		frame->state |= STATES::fixed; // mark as fixed
 
 		pthread_mutex_lock(&frame->mutex); // lock frame, put frame into buffer
@@ -119,7 +129,7 @@ void BufferManager::unfixPage(BufferFrame& frame, bool isDirty)
 
 	// mark thread as unfixed if it isn't used anymore
 	if (pthread_rwlock_trywrlock(this->_buffer.find(frame.getPageId())->second.first) == 0) {
-cout<<"UNFIX page"<<frame.getPageId()<<endl;
+//cout<<"UNFIX page"<<frame.getPageId()<<endl;
 		frame.state &= ~STATES::fixed;
 
 		pthread_mutex_lock(&this->_bufferMutex); // lock buffer so no other thread can interfere while we get/add a frame
@@ -150,7 +160,7 @@ cout<<"UNFIX page"<<frame.getPageId()<<endl;
 void BufferManager::_deleteFrame(BufferFrame* frame)
 {
 	if (frame==NULL) return;
-cout<<"deleting page"<<frame->getPageId()<<endl;
+//cout<<"deleting page"<<frame->getPageId()<<endl;
 	pthread_mutex_lock(&frame->mutex);
 
 	this->_writeFrame(frame); // write frame (_writeFrame does only write frame if frame is dirty..)
@@ -183,11 +193,17 @@ void* BufferManager::_readFrame(unsigned pageId)
 
 	// seek to page position
 	unsigned pageAddress = this->_getPageAddress(pageId);
-	this->_fstream.seekg(pageAddress, ios::beg); // will seek to specific position even if the fail isn't big enough
+	this->_fstream->seekg(pageAddress, ios::beg); // will seek to specific position even if the fail isn't big enough
 
 	// read page
 	void* frame = malloc(BufferManager::PAGE_SIZE);
-	this->_fstream.read(reinterpret_cast<char*>(frame), BufferManager::PAGE_SIZE);
+	this->_fstream->read(reinterpret_cast<char*>(frame), BufferManager::PAGE_SIZE);
+	if (!(*this->_fstream)) {
+		for (unsigned i=this->_fstream->gcount(); i<BufferManager::PAGE_SIZE; i++) {
+			reinterpret_cast<char*>(frame)[i] = 0;
+		}
+		this->_fstream->clear();
+	}
 
 	pthread_mutex_unlock(&this->_fstreamMutex);
 
@@ -205,8 +221,12 @@ void BufferManager::_writeFrame(BufferFrame* frame)
 	unsigned pageAddress = this->_getPageAddress(frame->getPageId());
 
 	pthread_mutex_lock(&this->_fstreamMutex); // lock file stream
-	this->_fstream.seekp(pageAddress, ios::beg);
-	this->_fstream.write(reinterpret_cast<char*>(frame->getData()), BufferManager::PAGE_SIZE);
+	this->_fstream->seekp(pageAddress, ios::beg);
+	this->_fstream->write(reinterpret_cast<char*>(frame->getData()), BufferManager::PAGE_SIZE);
+	if (!(*this->_fstream)) {
+		this->_fstream->clear();
+	}
+	cout<<"WRITE FRAME ("<<strerror( errno )<<"): "<<pageAddress<<endl;
 	pthread_mutex_unlock(&this->_fstreamMutex); // release file stream
 
 	pthread_mutex_unlock(&frame->mutex); // release frame

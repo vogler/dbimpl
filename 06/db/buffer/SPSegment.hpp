@@ -4,44 +4,42 @@
 #include <iostream>
 #include "BufferFrame.hpp"
 #include "Record.hpp"
+#include "Segment.hpp"
+#include "SlottedPage.hpp"
 #include <vector>
 #include <map>
 
 using namespace std;
 
-// typedef
-struct TID {
-  int pageID;
-  int slotID;
-  TID(const int pageID, const int slotID) : 
-    pageID(pageID), slotID(slotID) {}
-  bool operator<(const TID& A) const
-    { return pageID<A.pageID && slotID<A.slotID; }
-};
 
-class SPSegment
+/**
+ * Slotted Page Segment
+ */
+class SPSegment: public Segment
 {
+	static class SegmentFullException: public exception
+	{
+	} SegmentFullException;
+
+
 public:
 	/** public member **/
-  const static unsigned PAGES=2;
 
 	/** public methods **/
-	SPSegment(vector<BufferFrame*> pages);
-	~SPSegment();
+	SPSegment(BufferManager& bm, vector<BufferFrame*> pages);
 	
 	unsigned size();
-	BufferFrame& getPage(unsigned id);
 	
 	TID insert(const Record& r);
-	bool del(TID tid);
-	Record* lookup(TID tid);
+	bool remove(TID tid);
+	const Record* lookup(TID tid);
 	bool update(TID tid, const Record& r);
+	unsigned slotsPerPage() {
+		return _slottedPages.begin()->second.slotCount();
+	}
 
 protected:
-	vector<BufferFrame*> pages;
-	map<TID, const Record*> records;
-	unsigned page;
-	unsigned slot;
+	map<unsigned,SlottedPage> _slottedPages;
 };
 
 

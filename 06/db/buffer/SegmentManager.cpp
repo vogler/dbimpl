@@ -3,28 +3,38 @@
 using namespace std;
 
 
-SegmentManager::SegmentManager(BufferManager& bm) : bm(bm), si(bm.fixPage(0, true)) {
-  //this->si = ;
-  
+SegmentManager::SegmentManager(BufferManager& bm) : bm(bm) {
+	BufferFrame* page = &bm.fixPage(0,true);
+	this->si = new SISegment(bm, page);
 }
 
 SegmentManager::~SegmentManager(){
-  bm.unfixPage(this->si, true);
 }
 
-unsigned SegmentManager::addSegment(){
-  vector<BufferFrame*> pages;
-  pages.push_back(&bm.fixPage((this->size()-1)*2+1, false));
-  pages.push_back(&bm.fixPage((this->size()-1)*2+2, false));
-  SPSegment* s = new SPSegment(pages);
-  this->segments.push_back(s);
-  return this->segments.size();
+SegmentID SegmentManager::createSegment(Segment::SegmentType type, unsigned size){
+
+	return this->si->createSegment(type, size);
 }
 
-SPSegment& SegmentManager::getSegment(unsigned id){
-  return *this->segments[id];
+Segment& SegmentManager::getSegment(SegmentID id){
+	SISegment::SegmentEntry entry = this->si->segmentEntry(id);
+
+	vector<BufferFrame*> pages;
+	for (unsigned i=0; i<entry.size; i++) {
+		pages.push_back(&bm.fixPage(entry.pages[i], false));
+	}
+
+	Segment* s=NULL;
+	switch (entry.type) {
+
+		case Segment::SegmentType::SP:
+		default:
+			s = new SPSegment(bm, pages);
+		break;
+	}
+	return *s;
 }
 
 unsigned SegmentManager::size(){
-  return this->segments.size();
+  return this->si->pageCount();
 }

@@ -27,7 +27,7 @@ public:
 
 
 	/** public methods **/
-	BufferFrame(unsigned pageId, void* data);
+	BufferFrame(unsigned pageId, size_t size, void* data);
 	~BufferFrame();
 	void setData(void* data) {
 		this->_data = data;
@@ -38,8 +38,12 @@ public:
 	unsigned getPageId() { // inline since getter
 		return this->_pageId;
 	}
+	size_t getSize() {
+		return _size;
+	}
 
 protected:
+	size_t _size;
 	void* _data;
 	unsigned _pageId;
 };

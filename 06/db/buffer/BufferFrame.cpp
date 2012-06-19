@@ -7,8 +7,8 @@
 
 #include "BufferFrame.hpp"
 
-BufferFrame::BufferFrame(unsigned pageId, void* data):
-state(0), _data(data), _pageId(pageId)
+BufferFrame::BufferFrame(unsigned pageId, size_t size, void* data):
+state(0), _size(size), _data(data), _pageId(pageId)
 {
 	pthread_rwlock_init(&this->rwlock, NULL);
 

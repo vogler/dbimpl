@@ -2,6 +2,8 @@
 #define H_Record_HPP
 
 #include <string.h>
+#include <cstdlib>
+using namespace std;
 
 // A simple Record implementation (without custom allocator and error handling)
 class Record {

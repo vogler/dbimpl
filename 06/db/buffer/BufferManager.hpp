@@ -31,7 +31,7 @@ public:
 	 * public member
 	 */
 	/** size of a page in byte */
-	const static unsigned PAGE_SIZE=16*1024;
+	const static unsigned PAGE_SIZE=64*1024;
 
 	static class PageFixException: public exception
 	{
@@ -62,7 +62,7 @@ protected:
 
 	// iostream
 	pthread_mutex_t _fstreamMutex;
-	fstream _fstream;
+	fstream* _fstream;
 
 	// constructor arguments
 	string _filename;
