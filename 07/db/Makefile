@@ -6,8 +6,11 @@ test_slot: testing/slottedTest.cpp buffer/Record.hpp Makefile
 
 test_tree: testing/BTreeTest.cpp btree/BTree.hpp Makefile
 	g++ -pthread -std=c++0x -I./ -g -O2 -Wall btree/BTree.hpp testing/BTreeTest.cpp -o test_tree
-	
+
+test_op: testing/operatorTest.cpp Makefile
+	g++ -pthread -std=c++0x -I./ -g -O2 -Wall testing/operatorTest.cpp -o test_op
+
 clean:
 	rm -rf test_*
 
-all:	test_tree
+all:	test_op

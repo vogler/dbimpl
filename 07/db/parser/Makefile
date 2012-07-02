@@ -9,8 +9,8 @@ Schema.o: Schema.cpp Schema.hpp Makefile
 Parser.o: Parser.cpp Parser.hpp Makefile
 	$(CXX) $(CXXFLAGS) -c Parser.cpp -o Parser.o
 
-parser: Schema.o Parser.o Schema.hpp Types.hpp parser.cpp Makefile
-	$(CXX) $(CXXFLAGS) Parser.o Schema.o parser.cpp -o parser
+parser: Schema.o Parser.o Schema.hpp Types.hpp parse.cpp Makefile
+	$(CXX) $(CXXFLAGS) Parser.o Schema.o parse.cpp -o parser
 
 clean:
 	rm -rf *.o parser

@@ -6,23 +6,23 @@
 #include <string.h>
 #include <unordered_map>
 
-//#include "../buffer/BufferManager.hpp"
-//#include "../buffer/SlottedPage.hpp"
-//#include "../buffer/Segment.hpp"
-//#include "../buffer/SPSegment.hpp"
-//#include "../buffer/SISegment.hpp"
-//#include "../buffer/Record.hpp"
+#include "../PlanReader/Plan.hpp"
 
 using namespace std;
+using plan::Plan;
 
 int main(int argc, char** argv) {
-   // Check arguments
-   if (argc != 2) {
-      cerr << "usage: " << argv[0] << " <planFile>" << endl;
-      return -1;
-   }
-   // TODO
-//   const unsigned pageSize = atoi(argv[1]);
+	// Check arguments
+	if (argc != 2) {
+		cerr << "usage: " << argv[0] << " <planFile>" << endl;
+//      return -1;
+	}
+	Plan p;
+	p.fromFile(argv[1]);
+	p.print(std::cout);
+	const plan::Operator root = p.getRoot();
+	// TODO: walk down tree and execute the corresponding physical operators
 
-   return 0;
+
+	return 0;
 }

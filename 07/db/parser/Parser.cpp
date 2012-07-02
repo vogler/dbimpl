@@ -15,6 +15,7 @@ namespace keyword {
    const std::string Not = "not";
    const std::string Null = "null";
    const std::string Char = "char";
+   const std::string Comment = "--";
 }
 
 namespace literal {
@@ -80,6 +81,8 @@ void Parser::nextToken(unsigned line, const std::string& token, Schema& schema) 
       case State::Init:
          if (tok==keyword::Create)
             state=State::Create;
+//         else if(tok==keyword::Comment)
+//        	 state=State::Comment;
          else
             throw ParserError(line, "Expected 'CREATE', found '"+token+"'");
          break;

@@ -22,8 +22,37 @@ class ParserError : std::exception {
 struct Parser {
    std::string fileName;
    std::ifstream in;
-   enum class State : unsigned { Init, Create, Table, CreateTableBegin, CreateTableEnd, TableName, Primary, Key, KeyListBegin, KeyName, KeyListEnd, AttributeName, AttributeTypeInt, AttributeTypeChar, CharBegin, CharValue, CharEnd, AttributeTypeNumeric, NumericBegin, NumericValue1, NumericSeparator, NumericValue2, NumericEnd, Not, Null, Separator, Semicolon};
-   State state;
+   enum State {
+		Init,
+		Create,
+		Table,
+		CreateTableBegin,
+		CreateTableEnd,
+		TableName,
+		Primary,
+		Key,
+		KeyListBegin,
+		KeyName,
+		KeyListEnd,
+		AttributeName,
+		AttributeTypeInt,
+		AttributeTypeChar,
+		CharBegin,
+		CharValue,
+		CharEnd,
+		AttributeTypeNumeric,
+		NumericBegin,
+		NumericValue1,
+		NumericSeparator,
+		NumericValue2,
+		NumericEnd,
+		Not,
+		Null,
+		Separator,
+		Semicolon,
+		Comment
+	};
+	State state;
    Parser(const std::string& fileName) : fileName(fileName), state(State::Init) {}
    ~Parser() {};
    std::unique_ptr<Schema> parse();
