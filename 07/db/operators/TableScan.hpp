@@ -29,7 +29,7 @@ public:
 	}
 
 	bool next(){
-		currentTuple = spSeg->lookup<T>(tid);
+		currentTuple = static_cast<T*>(spSeg->lookup(tid));
 		if(currentTuple==0){
 			// check next page
 			unsigned pageID = SlottedPage::getPageID(tid);

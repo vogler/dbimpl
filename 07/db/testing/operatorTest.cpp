@@ -84,15 +84,15 @@ int main(int argc, char** argv) {
 	cout << endl << "-- init Buffer- and SegmentManager" << endl;
 	BufferManager bm("/tmp/db", 10ul * 1024ul * 1024ul); // bogus arguments
 	SegmentManager sm(bm);
-	SegmentID spId = sm.createSegment(Segment::SegmentType::Schema, 200);
-	SchemaSegment& scs = static_cast<SchemaSegment&>(sm.getSegment(spId));
+	SegmentID spId = sm.createSegment<SchemaSegment>(Segment::SegmentType::Schema, 200);
+	SchemaSegment& scs = *sm.getSegment<SchemaSegment>(spId);
 	// read schema
 	scs.readSchemaFromFile(fileCreate, &sm);
 
 
 	// insert tuples
 	cout << endl << "-- insert 5 tuples in each relation" << endl;
-	SPSegment& students = static_cast<SPSegment&>(sm.getSegment(scs.getRelationSegmentID("student")));
+	SPSegment& students = *sm.getSegment<SPSegment>(scs.getRelationSegmentID("student"));
 	struct {int id; char name[64];} sstudent;
 	for(int i=1; i<=5; i++){
 		sstudent.id = i;
@@ -103,8 +103,7 @@ int main(int argc, char** argv) {
 		Record r(sizeof(sstudent), (char*) ((void*) (&sstudent)));
 		students.insert(r); // TID id =
 	}
-	SPSegment& lectures = static_cast<SPSegment&>(sm.getSegment(
-			scs.getRelationSegmentID("lecture")));
+	SPSegment& lectures = *sm.getSegment<SPSegment>(scs.getRelationSegmentID("lecture"));
 	struct {
 		int id;
 		char name[64];
@@ -117,8 +116,7 @@ int main(int argc, char** argv) {
 		Record r(sizeof(slecture), (char*) ((void*) (&slecture)));
 		lectures.insert(r);
 	}
-	SPSegment& exams = static_cast<SPSegment&>(sm.getSegment(
-			scs.getRelationSegmentID("exam")));
+	SPSegment& exams = *sm.getSegment<SPSegment>(scs.getRelationSegmentID("exam"));
 	struct {
 		int l_id;
 		int s_id;
