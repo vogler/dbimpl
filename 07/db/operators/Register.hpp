@@ -12,7 +12,6 @@ enum DataType {
 
 class Register {
 	unsigned int size;
-	char *data;
 	std::map<unsigned int, DataType> offsetInReg;
 private:
 	int getInteger(unsigned int offset);
@@ -32,6 +31,7 @@ private:
 	}
 
 public:
+	char *data;
 	Register(unsigned int sizeInBytes);
 	Register();
 	virtual ~Register();

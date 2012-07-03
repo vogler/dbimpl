@@ -12,7 +12,6 @@ SegmentManager::~SegmentManager(){
 }
 
 SegmentID SegmentManager::createSegment(Segment::SegmentType type, unsigned size){
-
 	return this->si->createSegment(type, size);
 }
 
