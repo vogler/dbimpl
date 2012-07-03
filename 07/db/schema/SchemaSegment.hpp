@@ -3,6 +3,7 @@
 
 #include "../buffer/SISegment.hpp"
 #include "../buffer/SegmentManager.hpp"
+#include "../parser/Types.hpp"
 using namespace std;
 
 #define LENGTH 100

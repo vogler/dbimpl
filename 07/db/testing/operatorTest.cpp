@@ -9,8 +9,9 @@
 #include "../parser/Parser.hpp"
 #include "../parser/Schema.hpp"
 #include "../PlanReader/Plan.hpp"
+#include "../buffer/BufferManager.hpp"
+#include "../buffer/SegmentManager.hpp"
 #include "../schema/SchemaSegment.hpp"
-//#include "../buffer/BufferManager.hpp"
 //#include "../buffer/SlottedPage.hpp"
 //#include "../buffer/Segment.hpp"
 //#include "../buffer/SPSegment.hpp"
@@ -38,19 +39,19 @@ operators::Operator* walkTree(const plan::Operator& op, SchemaSegment& scs, Segm
 	operators::Operator* r;
 	if(type == plan::OperatorType::Sort){
 		const plan::Sort& p = dynamic_cast<const plan::Sort&>(op);
-		operators::Sort rr(walkTree(*p.child, scs, sm), p.attributeIds, p.order);
+		operators::Sort rr(walkTree(p.getChild(), scs, sm), p.attributeIds, p.order);
 		r = &rr;
 	}else if(type == plan::OperatorType::MergeJoin){
 		const plan::MergeJoin& p = dynamic_cast<const plan::MergeJoin&>(op);
-		operators::MergeJoin rr(walkTree(*p.left, scs, sm), walkTree(*p.right, scs, sm), p.attributeIdsLeft, p.attributeIdsRight, p.cmp);
+		operators::MergeJoin rr(walkTree(p.getLeft(), scs, sm), walkTree(p.getRight(), scs, sm), p.attributeIdsLeft, p.cmp, p.attributeIdsRight);
 		r = &rr;
 	}else if(type == plan::OperatorType::Select){
 		const plan::Select& p = dynamic_cast<const plan::Select&>(op);
-		operators::Select rr(walkTree(*p.child, scs, sm), p.attributeIds, p.constants, p.constants);
+		operators::Select rr(walkTree(p.getChild(), scs, sm), p.attributeIds, p.cmp, p.constants);
 		r = &rr;
 	}else if(type == plan::OperatorType::Project){
 		const plan::Project& p = dynamic_cast<const plan::Project&>(op);
-		operators::Project rr(walkTree(*p.child, scs, sm), p.attributeIds);
+		operators::Project rr(walkTree(p.getChild(), scs, sm), p.attributeIds);
 		r = &rr;
 	}else if(type == plan::OperatorType::TableScan){
 		const plan::TableScan& p = dynamic_cast<const plan::TableScan&>(op);
@@ -147,7 +148,7 @@ int main(int argc, char** argv) {
 
 	// print results
 	cout << endl << "-- print results" << endl;
-	operators::ScanFile print(op, cout);
+	operators::Print print(op, cout);
 	print.open();
 	while(print.next()){}
 	print.close();

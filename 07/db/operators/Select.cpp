@@ -2,9 +2,11 @@
 
 namespace operators {
 
-Select::Select(Operator* input, std::ostream& output) : output(output) {
-	this->input = input;
-}
+//Select::Select(Operator* input, std::vector<unsigned int>& attributeIds,
+//		plan::Cmp cmp,
+//		std::vector<std::string>& constants){
+//
+//}
 
 Select::~Select() {
 

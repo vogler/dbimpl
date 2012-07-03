@@ -13,7 +13,7 @@ private:
 	std::vector<unsigned int> regSizes;
 	std::vector<Register*> output;
 public:
-	ScanFile(std::fstream& input, std::vector<unsigned int>& regSizes);
+	ScanFile(std::fstream& input, std::vector<unsigned int>& regSizes) : input(input), regSizes(regSizes) {}
 	virtual ~ScanFile();
 
 	void open(){

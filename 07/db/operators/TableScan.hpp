@@ -2,6 +2,7 @@
 #define TABLESCAN_HPP_
 
 #include "../schema/SchemaSegment.hpp"
+#include "../buffer/SegmentManager.hpp"
 #include "Operator.hpp"
 
 using namespace std;

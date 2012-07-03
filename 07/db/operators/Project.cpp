@@ -2,9 +2,9 @@
 
 namespace operators {
 
-Project::Project(Operator* input, std::ostream& output) : output(output) {
-	this->input = input;
-}
+//Project::Project(Operator* input, std::vector<unsigned int>& attributeIds) : attributeIds(attributeIds) {
+//	this->input = input;
+//}
 
 Project::~Project() {
 

@@ -2,9 +2,9 @@
 
 namespace operators {
 
-MergeJoin::MergeJoin(Operator* input, std::ostream& output) : output(output) {
-	this->input = input;
-}
+//MergeJoin::MergeJoin(Operator* left, Operator* right, std::vector<unsigned int>& attrLeft, plan::Cmp& cmp, std::vector<unsigned int>& attrRight) {
+//
+//}
 
 MergeJoin::~MergeJoin() {
 

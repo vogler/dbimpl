@@ -9,9 +9,9 @@ namespace operators {
 class Project : public Operator {
 private:
 	Operator* input;
-	std::ostream& output;
+	const std::vector<unsigned int>& attributeIds;
 public:
-	Project(Operator* input, std::ostream& output);
+	Project(Operator* input, const std::vector<unsigned int>& attributeIds) : input(input), attributeIds(attributeIds){}
 	virtual ~Project();
 
 	void open(){
@@ -19,19 +19,16 @@ public:
 	}
 
 	bool next(){
-		if(input->next()){
-			std::vector<Register*> reg = input->getOutput();
-			for(auto it = reg.begin(); it != reg.end(); ++it) {
-				output << (*it)->toString() << std::endl;
-			}
-			return true;
-		} else {
-			return false;
-		}
+		return input->next();
 	}
 
 	std::vector<Register*> getOutput(){
-		return input->getOutput();
+		std::vector<Register*> reg = input->getOutput();
+		std::vector<Register*> proj;
+		for(auto it = attributeIds.begin(); it != attributeIds.end(); ++it) {
+			proj.push_back(reg[*it]);
+		}
+		return proj;
 	}
 
 	void close(){
