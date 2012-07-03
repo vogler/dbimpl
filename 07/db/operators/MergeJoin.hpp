@@ -66,7 +66,7 @@ public:
 			}
 			doLeft = true; doRight = true; // advance on both sides
 			return true;
-		} else { // stopped being equal -> advance side that has a new value now
+		} else { // stopped being equal -> advance side that has still the old value
 
 		}
 		// TODO emit n*m until cross==0

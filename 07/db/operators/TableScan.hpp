@@ -18,7 +18,8 @@ class TableScan : public Operator {
 public:
 	TableScan(shared_ptr<SchemaSegment> scs, SegmentManager* sm, string relationName) {
 		SegmentID segID = scs->getRelationSegmentID(relationName);
-		this->spSeg = sm->getSegment<SPSegment>(segID);
+		Segment* s = &sm->getSegment(segID);
+		spSeg = static_cast<SPSegment*>(s);
 		tid = 0;
 		reg = new std::vector<Register*>;
 	}
@@ -29,12 +30,14 @@ public:
 	}
 
 	bool next(){
-		currentTuple = static_cast<T*>(spSeg->lookup(tid));
+//		const Record* r = spSeg->lookup(tid);
+		currentTuple = (T*)&(spSeg->lookup(tid)->data);
 		if(currentTuple==0){
 			// check next page
 			unsigned pageID = SlottedPage::getPageID(tid);
 			tid = SlottedPage::getTID(pageID, 0);
-			currentTuple = spSeg->lookup<T>(tid);
+//			currentTuple = spSeg->lookup<T>(tid);
+			currentTuple = (T*)&(spSeg->lookup(tid)->data);
 			if(currentTuple==0){ // no more tuple in relation
 				return false;
 			}
