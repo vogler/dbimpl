@@ -1,0 +1,2 @@
+the program can be called with "./SimiopaDB <file> <pagesOnDisk> <pagesInRAM> <threads>"
+we tested it with pagesOnDisk=100, pagesInRAM=100 because there is still a deadlock problem in our buffer manager
