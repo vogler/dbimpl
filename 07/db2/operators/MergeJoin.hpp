@@ -54,24 +54,23 @@ public:
 		return true;
 	}
 
-	/*function sortMerge(relation left, relation right, attribute a)
-	     var relation output
-	     var list left_sorted := sort(left, a) // Relation left sorted on attribute a
-	     var list right_sorted := sort(right, a)
-	     var attribute left_key, right_key
-	     var set left_subset, right_subset // These sets discarded except where join predicate is satisfied
-	     advance(left_subset, left_sorted, left_key, a)
-	     advance(right_subset, right_sorted, right_key, a)
-	     while not empty(left_subset) and not empty(right_subset)
-	         if left_key = right_key // Join predicate satisfied
-	             add cross product of left_subset and right_subset to output
-	             advance(left_subset, left_sorted, left_key, a)
-	             advance(right_subset, right_sorted, right_key, a)
-	         else if left_key < right_key
-	            advance(left_subset, left_sorted, left_key, a)
-	         else // left_key > right_key
-	            advance(right_subset, right_sorted, right_key, a)
-	     return output*/
+	/*get first row R1 from input 1
+	get first row R2 from input 2
+	while not at the end of either input
+		begin
+			if R1 joins with R2
+				begin
+					// buffer.add(R2)
+					return (R1, R2)
+					get next row R2 from input 2
+				end
+			else if R1 < R2
+				// R1 duplicate -> playback buffer until empty
+				// else -> discard buffer
+				get next row R1 from input 1
+			else
+				get next row R2 from input 2
+		end*/
 	bool next(){
 		// check state
 		if(state==state::START){
