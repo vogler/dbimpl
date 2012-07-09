@@ -16,7 +16,7 @@ private:
 	const plan::Cmp cmp;
 	bool doLeft;
 	bool doRight;
-	std::vector<Register*> buffer;
+	std::vector<std::vector<Register*>> buffer;
 	enum state {START, LEFT, RIGHT, END};
 public:
 	MergeJoin(Operator* left, Operator* right,
@@ -78,23 +78,27 @@ public:
 		}else if(state==state::END && buffer.empty()){ // at end of both sides and empty buffer -> done
 			return false;
 		}
-		if(eq()){ // match
-			if(doLeft && doRight) { // previous was also equal -> do cross product for n:m case
-				cross++; // TODO save in list
-			}
-			doLeft = true; doRight = true; // advance on both sides
-			return true;
-		} else { // stopped being equal -> advance side that has still the old value
-
+		// advance one side and return if at end, TODO buffer?
+		if(state==state::LEFT){
+			if(!left->next()) return false;
 		}
-		// TODO list !empty? -> emit n*m until cross==0
+		if(state==state::RIGHT){
+			if(!right->next()) return false;
+		}
+
+		if(eq()){ // match
+			buffer.push_back(right->getOutput()); // save right side in playback buffer
+			state = state::RIGHT; // advance right side in the next step
+			return true;
+		}
+		// not equal
 
 		if(lt()) { // left is smaller
-			doLeft = true; doRight = false; cross = 0;
-			return next(); // try next tuple
+			state = state::LEFT; // advance left side in the next step
+			return next();
 		} else { // right is smaller
-			doLeft = false; doRight = true; cross = 0;
-			return next(); // try next tuple
+			state = state::RIGHT; // advance right side in the next step
+			return next();
 		}
 		return false;
 	}
