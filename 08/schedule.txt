@@ -1,0 +1,6 @@
+w2B
+r1B
+w1A
+r2A
+w2C
+r3C
