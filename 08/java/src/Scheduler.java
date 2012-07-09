@@ -84,7 +84,7 @@ public class Scheduler {
 		r.add("digraph SerializabilityGraph {");
 		List<Conflict> conflicts = getConflicts();
 		for (Conflict c : conflicts) {
-			String s = "\t" + c.a.t + " --> " + c.b.t + ";";
+			String s = "\t" + c.a.t + " -> " + c.b.t + ";";
 			if (r.contains(s)) continue; // only one arrow even if multiple conflicts
 			r.add(s);
 		}
