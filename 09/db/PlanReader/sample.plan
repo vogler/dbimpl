@@ -1,0 +1,11 @@
+sort 1 ASC
+project 6 4
+merge 0 EQ 3
+ sort 0 ASC
+  scan student
+ merge 0 EQ 0
+  sort 0 ASC
+   select 1 EQ dbimpl
+    scan lecture
+  sort 0 ASC
+   scan exam
