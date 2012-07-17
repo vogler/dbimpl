@@ -15,6 +15,15 @@ typedef unsigned int PageID;
 struct TID {
 	unsigned short int slotID;	// 2 byte for slotID
 	PageID pageID;				// 4 byte for pageID, relative to the segments start page
+	bool operator() (const TID& lhs, const TID& rhs) const
+	  {return lhs.slotID<rhs.slotID && lhs.pageID<rhs.pageID;};
+//	bool operator< (const TID& other) const
+//	  {return slotID<other.slotID && pageID < other.pageID;};
+//	string to_s() {
+//		stringstream ss;
+//		ss << "TID: " << this->slotID << this->pageID;
+//		return ss.str();
+//	};
 };
 
 // this is a bad choice due to alignment (requires 8 byte instead of 6)

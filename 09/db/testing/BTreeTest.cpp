@@ -8,7 +8,7 @@
 #include <assert.h>
 
 //#include "MyDatabaseIncludes.hpp"
-#include "../btree/BTree.hpp"
+#include "../bplustrees/BTree.h"
 
 /* Comparator functor for uint64_t*/
 struct MyCustomUInt64Cmp {

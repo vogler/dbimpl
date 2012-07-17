@@ -9,14 +9,16 @@ OBJS +=		./parser/Parser.o ./parser/Schema.o
 OBJS +=		./schema/SchemaSegment.o
 OBJS +=		./operators/Register.o ./operators/Print.o ./operators/TableScan.o ./operators/Operator.o
 OBJS +=		./PlanReader/Plan.o ./operators/MergeJoin.o ./operators/Project.o ./operators/ScanFile.o ./operators/Select.o ./operators/Sort.o 
+OBJS +=		./lock/LockManager.o
 
 #OBJS +=		./SimiopaDB.o
-OBJS +=		./testing/operatorTest.o
+#OBJS +=		./testing/operatorTest.o
+OBJS +=		./testing/lockTest.o
 
 
 LIBS =	-lpthread
 
-TARGET =	SimiopaDB
+TARGET =	test
 
 $(TARGET):	$(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) $(LIBS) $(CXXFLAGS)

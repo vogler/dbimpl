@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
-#include "BufferManager.hpp"
+#include "buffer/BufferManager.h"
 using namespace std;
 
 BufferManager* bm;
