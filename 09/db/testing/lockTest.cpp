@@ -5,7 +5,7 @@
 #include <cassert>
 #include <unordered_map>
 #include <pthread.h>
-#include <time.h>
+#include <sys/time.h>
 #include <set>
 
 #include "../parser/Parser.hpp"
@@ -33,12 +33,14 @@ const unsigned maxRand = 100;
 
 static void* lock(void *arg) {
 	uintptr_t threadNum = reinterpret_cast<uintptr_t>(arg);
-	TID tid = {(short int)(rand()%maxRand),rand()%maxRand};
+	TID tid = {(short int)(rand()%maxRand+100),rand()%maxRand+100};
 //	TID tid;
 //	do {
 //		tid = {(short int)(rand()%maxRand),rand()%maxRand};
 //	} while (done.count(tid) > 0);
-	cout << "-- Thread " << threadNum << " wants to lock " << tid.slotID << tid.pageID << endl;
+	stringstream ss;
+	ss << "- Thread " << threadNum << " wants to lock " << tid.slotID << tid.pageID;
+	lm->debug(ss.str());
 	uintptr_t r = lm->lock(tid, threadNum);
 //	done.insert(tid);
 	return reinterpret_cast<void*>(r);
@@ -85,7 +87,8 @@ int main(int argc, char** argv) {
 //	bm = new BufferManager(fileDb, pagesInRAM);
 
 	// benchmark
-	int clo = clock();
+	timeval begin, end;
+	gettimeofday(&begin, NULL);
 
 	srand ( time(NULL) );
 	pthread_t threads[threadCount];
@@ -99,21 +102,28 @@ int main(int argc, char** argv) {
 //	  bm->unfixPage(bf, true);
 //	}
 
-	// strict 2PL
-	// start lock threads
-	for (unsigned i=0; i<threadCount; i++)
-	  pthread_create(&threads[i], &pattr, lock, reinterpret_cast<void*>(i));
+	// TODO: worklist that contains transactions that couldn't acquire locks
 
-	// wait for lock threads
+	// strict 2PL
+	cout << "-- start lock threads" << endl;
+	for (unsigned i=0; i<threadCount; i++){
+	  pthread_create(&threads[i], &pattr, lock, reinterpret_cast<void*>(i));
+	  cout << "- started thread " << i << endl;
+	}
+
+	cout << "-- wait for lock threads" << endl;
 	unsigned totalCount = 0;
 	for (unsigned i=0; i<threadCount; i++) {
 	  void *ret;
+	  cout << "- join thread " << i << endl;
 	  pthread_join(threads[i], &ret);
+	  cout << "- joined thread " << i << endl;
 	  totalCount+=reinterpret_cast<uintptr_t>(ret);
 	}
 
-	cout << "--> done with locking, will continue with unlocking after pause..." << endl;
-	sleep(1); // now we have all locks and can do stuff
+	cout << "-- done with locking: successfully locked " << totalCount << " tuples" << endl;
+//	sleep(1); // now we have all locks and can do stuff
+	cout << "-- start unlocking" << endl;
 
 	// start unlock threads
 	for (unsigned i=0; i<threadCount; i++)
@@ -126,7 +136,9 @@ int main(int argc, char** argv) {
 
 
 	// benchmark
-	cout << "time: " << (clock() - clo) << endl;
+	gettimeofday(&end, NULL);
+	// ~2ms
+	cout << endl << "time: " << (end.tv_sec-begin.tv_sec)*1000000+(end.tv_usec-begin.tv_usec) << "µs" << endl;
 
 //	delete bm;
 	delete lm;
